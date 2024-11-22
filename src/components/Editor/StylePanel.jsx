@@ -11,7 +11,7 @@ function StylePanel({ element, onUpdate, onClose }) {
   };
 
   return (
-    <div className="fixed right-0 top-0 h-screen w-64 bg-white shadow-lg p-4">
+    <div className="fixed right-0 top-0 h-screen w-64 bg-white shadow-lg p-4 overflow-y-auto">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold">Style Editor</h3>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -46,13 +46,24 @@ function StylePanel({ element, onUpdate, onClose }) {
                 className="w-full"
               />
             </div>
+            <div>
+              <label className="block text-sm mb-1">Background Color</label>
+              <input
+                type="color"
+                value={styles.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  updateStyles({ backgroundColor: e.target.value })
+                }
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Spacing */}
+        {/* Layout */}
         <div className="border-b pb-4">
           <h4 className="flex items-center gap-2 mb-2">
-            <FaRuler /> Spacing
+            <FaRuler /> Layout
           </h4>
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -67,12 +78,12 @@ function StylePanel({ element, onUpdate, onClose }) {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Margin</label>
+              <label className="block text-sm mb-1">Border Radius</label>
               <input
                 type="number"
-                value={parseInt(styles.margin) || 0}
+                value={parseInt(styles.borderRadius) || 0}
                 onChange={(e) =>
-                  updateStyles({ margin: `${e.target.value}px` })
+                  updateStyles({ borderRadius: `${e.target.value}px` })
                 }
                 className="w-full px-2 py-1 border rounded"
               />

@@ -3,10 +3,10 @@ import { Droppable } from "@hello-pangea/dnd";
 import { Rnd } from "react-rnd";
 import { FaUndo, FaRedo } from "react-icons/fa";
 import ElementRenderer from "./ElementRenderer";
-import StylePanel from "./StylePanel";
+import StyleEditor from "./StyleEditor";
 import useHistory from "../../hooks/useHistory";
 
-function EditorCanvas({ initialElements, onElementsUpdate }) {
+function EditorCanvas({ initialElements, onElementsUpdate, onSelectElement }) {
   const {
     state: elements,
     push: pushHistory,
@@ -27,6 +27,19 @@ function EditorCanvas({ initialElements, onElementsUpdate }) {
   const handleElementUpdate = (updatedElements) => {
     pushHistory(updatedElements);
     onElementsUpdate(updatedElements);
+  };
+
+  const handleStyleUpdate = (updates) => {
+    const updatedElements = elements.map((el) =>
+      el.id === selectedElement.id
+        ? {
+            ...el,
+            ...(updates.styles && { styles: updates.styles }),
+            ...(updates.content && { content: updates.content }),
+          }
+        : el
+    );
+    handleElementUpdate(updatedElements);
   };
 
   return (
@@ -103,14 +116,9 @@ function EditorCanvas({ initialElements, onElementsUpdate }) {
       </Droppable>
 
       {selectedElement && (
-        <StylePanel
+        <StyleEditor
           element={selectedElement}
-          onUpdate={(styles) => {
-            const updatedElements = elements.map((el) =>
-              el.id === selectedElement.id ? { ...el, styles } : el
-            );
-            handleElementUpdate(updatedElements);
-          }}
+          onUpdate={handleStyleUpdate}
           onClose={() => setSelectedElement(null)}
         />
       )}

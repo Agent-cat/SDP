@@ -4,9 +4,12 @@ import {
   FaEyeSlash,
   FaLock,
   FaLockOpen,
+  FaPencilAlt,
 } from "react-icons/fa";
 
-function LayersPanel({ elements, onUpdate }) {
+function LayersPanel({ elements, onUpdate, onSelectElement, isVisible }) {
+  if (!isVisible) return null;
+
   const handleVisibilityToggle = (id) => {
     onUpdate(
       elements.map((el) => (el.id === id ? { ...el, hidden: !el.hidden } : el))
@@ -44,8 +47,8 @@ function LayersPanel({ elements, onUpdate }) {
               <button onClick={() => handleLockToggle(element.id)}>
                 {element.locked ? <FaLock /> : <FaLockOpen />}
               </button>
-              <button onClick={() => handleGroupCreate([element.id])}>
-                <FaLayerGroup />
+              <button onClick={() => onSelectElement(element)}>
+                <FaPencilAlt />
               </button>
             </div>
           </div>

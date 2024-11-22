@@ -1,53 +1,55 @@
-import ContentEditor from "./ContentEditor";
+import React from "react";
 
-function ElementRenderer({ element, onUpdate }) {
-  const renderElement = () => {
-    const commonProps = {
-      style: element.styles,
-      className:
-        element.type === "heading" ? "text-2xl font-bold" : "text-base",
-    };
+function ElementRenderer({ element }) {
+  const { type, content, styles = {} } = element;
 
-    switch (element.type) {
-      case "heading":
-      case "paragraph":
-        return (
-          <ContentEditor
-            element={element}
-            onUpdate={onUpdate}
-            {...commonProps}
-          />
-        );
-
-      case "image":
-        return (
-          <img
-            src={element.content || "https://via.placeholder.com/150"}
-            alt={element.alt || "Image"}
-            {...commonProps}
-          />
-        );
-
-      case "button":
-        return (
-          <button {...commonProps}>
-            <ContentEditor element={element} onUpdate={onUpdate} />
-          </button>
-        );
-
-      case "container":
-        return (
-          <div {...commonProps}>
-            <ContentEditor element={element} onUpdate={onUpdate} />
-          </div>
-        );
-
-      default:
-        return null;
-    }
+  const elementStyles = {
+    ...styles,
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: styles.padding || "8px",
+    borderRadius: styles.borderRadius || "0px",
+    backgroundColor: styles.backgroundColor || "#ffffff",
+    color: styles.color || "#000000",
+    fontSize: styles.fontSize ? `${styles.fontSize}px` : "16px",
+    border: styles.borderWidth
+      ? `${styles.borderWidth}px solid ${styles.borderColor}`
+      : "none",
   };
 
-  return <div className="element-wrapper">{renderElement()}</div>;
+  switch (type) {
+    case "text":
+      return <div style={elementStyles}>{content || "Text"}</div>;
+    case "button":
+      return <button style={elementStyles}>{content || "Button"}</button>;
+    case "input":
+      return (
+        <input
+          type="text"
+          style={elementStyles}
+          placeholder={content || "Input"}
+        />
+      );
+    case "image":
+      return (
+        <div style={elementStyles}>
+          {content ? (
+            <img
+              src={content}
+              alt="element"
+              style={{ maxWidth: "100%", maxHeight: "100%" }}
+            />
+          ) : (
+            "Image"
+          )}
+        </div>
+      );
+    default:
+      return <div style={elementStyles}>{content || type}</div>;
+  }
 }
 
 export default ElementRenderer;

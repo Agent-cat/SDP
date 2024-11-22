@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaCode, FaDownload } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 
 function ExportPanel({ elements }) {
   const [exportType, setExportType] = useState("html");
@@ -68,26 +68,21 @@ function ExportPanel({ elements }) {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg">
-      <div className="flex items-center gap-4 mb-4">
-        <select
-          value={exportType}
-          onChange={(e) => setExportType(e.target.value)}
-          className="px-2 py-1 border rounded"
-        >
-          <option value="html">HTML</option>
-          <option value="css">CSS</option>
-        </select>
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          <FaDownload /> Export
-        </button>
-      </div>
-      <pre className="bg-gray-100 p-2 rounded max-h-48 overflow-auto">
-        <code>{exportType === "html" ? generateHTML() : generateCSS()}</code>
-      </pre>
+    <div className="flex items-center gap-2">
+      <select
+        value={exportType}
+        onChange={(e) => setExportType(e.target.value)}
+        className="px-2 py-1 border rounded"
+      >
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+      </select>
+      <button
+        onClick={handleExport}
+        className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        <FaDownload /> Export
+      </button>
     </div>
   );
 }
