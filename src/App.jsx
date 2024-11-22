@@ -7,6 +7,7 @@ import LayersPanel from "./components/Editor/LayersPanel";
 import ExportPanel from "./components/Editor/ExportPanel";
 import { DragDropContext } from "@hello-pangea/dnd";
 import LayersButton from "./components/Editor/LayersButton";
+import TemplateGallery from "./components/Templates/TemplateGallery";
 
 function App() {
   const [elements, setElements] = useState([]);
@@ -73,6 +74,19 @@ function App() {
                   <ProjectManager
                     elements={elements}
                     onLoad={handleElementsUpdate}
+                  />
+                  <TemplateGallery
+                    onSelectTemplate={(templateElements) => {
+                      const elementsWithNewIds = templateElements.map(
+                        (element) => ({
+                          ...element,
+                          id: `${element.type}_${Date.now()}_${Math.random()
+                            .toString(36)
+                            .substr(2, 9)}`,
+                        })
+                      );
+                      handleElementsUpdate(elementsWithNewIds);
+                    }}
                   />
                   <LayersButton
                     onClick={() => setShowLayers(!showLayers)}
