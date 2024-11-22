@@ -34,22 +34,23 @@ function ProjectManager({ elements, onLoad }) {
   };
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-white p-2 rounded-lg shadow-lg z-50">
+    <div className="flex items-center gap-3 px-4 py-2">
       <input
         type="text"
         value={projectName}
         onChange={(e) => setProjectName(e.target.value)}
-        className="px-2 py-1 border rounded"
+        className="px-3 py-1.5 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+        placeholder="Project Name"
       />
       <button
         onClick={saveProject}
-        className="flex items-center gap-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
       >
         <FaSave /> Save
       </button>
       <button
         onClick={loadProject}
-        className="flex items-center gap-2 px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+        className="flex items-center gap-2 px-4 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
       >
         <FaFolderOpen /> Load
       </button>

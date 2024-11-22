@@ -29,8 +29,33 @@ function ExportPanel({ elements }) {
           case "button":
             html += `<button style="${styles}">${element.content}</button>\n`;
             break;
+          case "input":
+            html += `<input type="text" placeholder="${element.content}" style="${styles}">\n`;
+            break;
+          case "checkbox":
+            html += `<label style="${styles}"><input type="checkbox">${
+              element.content || "Checkbox"
+            }</label>\n`;
+            break;
+          case "radio":
+            html += `<label style="${styles}"><input type="radio" name="radio_${
+              element.id
+            }">${element.content || "Radio"}</label>\n`;
+            break;
           case "container":
-            html += `<div style="${styles}">${element.content}</div>\n`;
+            html += `<div style="${styles}" class="container">${
+              element.content || ""
+            }</div>\n`;
+            break;
+          case "list":
+            const items = (element.content || "")
+              .split("\n")
+              .map((item) => `  <li>${item}</li>`)
+              .join("\n");
+            html += `<ul style="${styles}">\n${items}\n</ul>\n`;
+            break;
+          default:
+            html += `<div style="${styles}">${element.content || ""}</div>\n`;
             break;
         }
       }

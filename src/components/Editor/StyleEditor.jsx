@@ -1,30 +1,25 @@
 import { useState, useEffect } from "react";
 import { SketchPicker } from "react-color";
 import Slider from "rc-slider";
-import { FaTimes, FaFont, FaRuler, FaPalette, FaEdit } from "react-icons/fa";
+import {
+  FaTimes,
+  FaFont,
+  FaRuler,
+  FaPalette,
+  FaEdit,
+  FaCog,
+} from "react-icons/fa";
 import "rc-slider/assets/index.css";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 function StyleEditor({ element, onUpdate, onClose }) {
-  const [styles, setStyles] = useState({
-    color: "#000000",
-    backgroundColor: "#ffffff",
-    fontSize: 16,
-    padding: 0,
-    margin: 0,
-    borderRadius: 0,
-    opacity: 100,
-    border: "none",
-    borderColor: "#000000",
-    borderWidth: 0,
-  });
+  const [styles, setStyles] = useState(element?.styles || {});
   const [content, setContent] = useState(element?.content || "");
 
   useEffect(() => {
     if (element) {
-      setStyles((prev) => ({
-        ...prev,
-        ...element.styles,
-      }));
+      setStyles(element.styles || {});
       setContent(element.content || "");
     }
   }, [element]);
@@ -32,16 +27,190 @@ function StyleEditor({ element, onUpdate, onClose }) {
   const handleStyleChange = (property, value) => {
     const updatedStyles = { ...styles, [property]: value };
     setStyles(updatedStyles);
-    onUpdate({ styles: updatedStyles });
+    onUpdate({
+      ...element,
+      styles: updatedStyles,
+    });
   };
 
   const handleContentChange = (newContent) => {
     setContent(newContent);
-    onUpdate({ content: newContent });
+    onUpdate({
+      ...element,
+      content: newContent,
+    });
+  };
+
+  useGSAP(() => {
+    gsap.from(".style-editor", {
+      x: 100,
+      opacity: 0,
+      duration: 0.5,
+      ease: "power3.out",
+    });
+  }, []);
+
+  const renderInputControls = () => {
+    if (["input", "checkbox", "radio"].includes(element.type)) {
+      return (
+        <div className="border-b pb-4">
+          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
+            <FaCog /> Input Settings
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Label Text
+              </label>
+              <input
+                type="text"
+                value={element.label || ""}
+                onChange={(e) =>
+                  onUpdate({ ...element, label: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Enter label text"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {element.type === "input" ? "Placeholder" : "Label Content"}
+              </label>
+              <input
+                type="text"
+                value={element.content || ""}
+                onChange={(e) =>
+                  onUpdate({ ...element, content: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder={
+                  element.type === "input" ? "Enter placeholder" : "Enter label"
+                }
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Input Style
+              </label>
+              <select
+                value={element.inputStyle || "default"}
+                onChange={(e) =>
+                  onUpdate({ ...element, inputStyle: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="default">Default</option>
+                <option value="outlined">Outlined</option>
+                <option value="filled">Filled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderContentControls = () => {
+    switch (element.type) {
+      case "heading":
+        return (
+          <div className="border-b pb-4">
+            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
+              <FaEdit /> Heading Content
+            </h3>
+            <div>
+              <textarea
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md resize-y"
+                placeholder="Enter heading text"
+                rows={2}
+              />
+            </div>
+          </div>
+        );
+
+      case "paragraph":
+        return (
+          <div className="border-b pb-4">
+            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
+              <FaEdit /> Paragraph Content
+            </h3>
+            <div>
+              <textarea
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md resize-y"
+                placeholder="Enter paragraph text"
+                rows={4}
+              />
+            </div>
+          </div>
+        );
+
+      case "button":
+        return (
+          <div className="border-b pb-4">
+            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
+              <FaEdit /> Button Text
+            </h3>
+            <div>
+              <input
+                type="text"
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Enter button text"
+              />
+            </div>
+          </div>
+        );
+
+      case "image":
+        return (
+          <div className="border-b pb-4">
+            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
+              <FaEdit /> Image Settings
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Image URL
+                </label>
+                <input
+                  type="text"
+                  value={content}
+                  onChange={(e) => handleContentChange(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="Enter image URL"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Alt Text
+                </label>
+                <input
+                  type="text"
+                  value={element.alt || ""}
+                  onChange={(e) =>
+                    onUpdate({ ...element, alt: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="Enter alt text"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="fixed right-0 top-0 h-screen w-80 bg-white shadow-lg p-4 overflow-y-auto">
+    <div className="style-editor fixed right-0 top-0 w-full md:w-80 lg:w-64 h-full bg-white shadow-lg p-4 overflow-y-auto z-50">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Style Editor - {element.type}</h2>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -50,22 +219,8 @@ function StyleEditor({ element, onUpdate, onClose }) {
       </div>
 
       <div className="space-y-6">
-        <div className="border-b pb-4">
-          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-            <FaEdit /> Content
-          </h3>
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Text Content
-            </label>
-            <textarea
-              value={content}
-              onChange={(e) => handleContentChange(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md resize-y"
-              rows={3}
-            />
-          </div>
-        </div>
+        {renderContentControls()}
+        {renderInputControls()}
 
         <div className="border-b pb-4">
           <h3 className="flex items-center gap-2 text-lg font-medium mb-3">

@@ -24,15 +24,36 @@ function App() {
       result.source.droppableId === "sidebar" &&
       result.destination.droppableId === "canvas"
     ) {
+      const defaultStyles = {
+        input: {
+          padding: "8px",
+          borderRadius: "4px",
+          border: "1px solid #e2e8f0",
+          width: "100%",
+        },
+        checkbox: {
+          width: "16px",
+          height: "16px",
+        },
+        radio: {
+          width: "16px",
+          height: "16px",
+        },
+      };
+
       const draggedElement = {
         id: `${result.draggableId}_${Date.now()}`,
         type: result.draggableId,
         content: "",
+        label: `${
+          result.draggableId.charAt(0).toUpperCase() +
+          result.draggableId.slice(1)
+        } Label`,
         x: 0,
         y: 0,
         width: 200,
-        height: 100,
-        styles: {},
+        height: result.draggableId === "input" ? 80 : 40,
+        styles: defaultStyles[result.draggableId] || {},
       };
 
       const newElements = [...elements, draggedElement];

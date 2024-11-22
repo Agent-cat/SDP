@@ -22,16 +22,8 @@ function LayersPanel({ elements, onUpdate, onSelectElement, isVisible }) {
     );
   };
 
-  const handleGroupCreate = (selectedIds) => {
-    const groupId = `group_${Date.now()}`;
-    const groupedElements = elements.map((el) =>
-      selectedIds.includes(el.id) ? { ...el, groupId } : el
-    );
-    onUpdate(groupedElements);
-  };
-
   return (
-    <div className="absolute right-0 top-0 w-64 bg-white h-full shadow-lg p-4">
+    <div className="fixed right-0 top-0 w-full md:w-80 lg:w-64 h-full bg-white shadow-lg p-4 overflow-y-auto z-40">
       <h3 className="text-lg font-bold mb-4">Layers</h3>
       <div className="space-y-2">
         {elements.map((element) => (
