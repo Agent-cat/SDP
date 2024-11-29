@@ -1,117 +1,118 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { BrowserRouter } from "react-router-dom";
+import { useElements } from "./hooks/useElements";
+import { useCallback, useState } from "react";
 import EditorCanvas from "./components/Editor/EditorCanvas";
 import Sidebar from "./components/Sidebar/Sidebar";
-import ProjectManager from "./components/ProjectManager/ProjectManager";
+import MainLayout from "./components/Layout/MainLayout";
 import LayersPanel from "./components/Editor/LayersPanel";
 import ExportPanel from "./components/Editor/ExportPanel";
 import { DragDropContext } from "@hello-pangea/dnd";
-import LayersButton from "./components/Editor/LayersButton";
-import TemplateGallery from "./components/Templates/TemplateGallery";
+import Navbar from "./components/Navbar/Navbar";
+import StyleEditor from "./components/Editor/StyleEditor";
 
 function App() {
-  const [elements, setElements] = useState([]);
-  const [selectedElement, setSelectedElement] = useState(null);
+  const {
+    elements,
+    selectedElement,
+    setSelectedElement,
+    updateElement,
+    addElement,
+    removeElement,
+  } = useElements([]);
+
   const [showLayers, setShowLayers] = useState(false);
 
-  const handleElementsUpdate = (updatedElements) => {
-    setElements(updatedElements);
-  };
+  const handleDragEnd = useCallback(
+    (result) => {
+      if (!result.destination) return;
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
+      const { source, destination, draggableId } = result;
 
-    if (
-      result.source.droppableId === "sidebar" &&
-      result.destination.droppableId === "canvas"
-    ) {
-      const defaultStyles = {
-        input: {
-          padding: "8px",
-          borderRadius: "4px",
-          border: "1px solid #e2e8f0",
-          width: "100%",
-        },
-        checkbox: {
-          width: "16px",
-          height: "16px",
-        },
-        radio: {
-          width: "16px",
-          height: "16px",
-        },
-      };
+      // Handle dropping from sidebar to canvas
+      if (
+        source.droppableId === "sidebar" &&
+        destination.droppableId === "canvas"
+      ) {
+        const dropPoint = {
+          x: destination.x || 0,
+          y: destination.y || 0,
+        };
 
-      const draggedElement = {
-        id: `${result.draggableId}_${Date.now()}`,
-        type: result.draggableId,
-        content: "",
-        label: `${
-          result.draggableId.charAt(0).toUpperCase() +
-          result.draggableId.slice(1)
-        } Label`,
-        x: 0,
-        y: 0,
-        width: 200,
-        height: result.draggableId === "input" ? 80 : 40,
-        styles: defaultStyles[result.draggableId] || {},
-      };
+        const newElement = {
+          id: `${draggableId}_${Date.now()}`,
+          type: draggableId,
+          content: "",
+          x: dropPoint.x,
+          y: dropPoint.y,
+          width: 200,
+          height: 40,
+          styles: {},
+          locked: false,
+          hidden: false,
+        };
 
-      const newElements = [...elements, draggedElement];
-      handleElementsUpdate(newElements);
-    }
+        addElement(newElement);
+      }
+    },
+    [addElement]
+  );
+
+  const handleElementUpdate = (elementId, updates) => {
+    updateElement(elementId, {
+      ...updates,
+      id: elementId,
+      x:
+        updates.x !== undefined
+          ? updates.x
+          : elements.find((el) => el.id === elementId)?.x,
+      y:
+        updates.y !== undefined
+          ? updates.y
+          : elements.find((el) => el.id === elementId)?.y,
+      width:
+        updates.width !== undefined
+          ? updates.width
+          : elements.find((el) => el.id === elementId)?.width,
+      height:
+        updates.height !== undefined
+          ? updates.height
+          : elements.find((el) => el.id === elementId)?.height,
+    });
   };
 
   return (
     <BrowserRouter>
-      <div className="flex h-screen bg-gray-100">
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex flex-1">
-            <Sidebar />
-            <main className="flex-1 flex flex-col">
-              <div className="flex justify-between items-center p-4 bg-white shadow-sm">
-                <div className="flex items-center gap-4">
-                  <ProjectManager
-                    elements={elements}
-                    onLoad={handleElementsUpdate}
-                  />
-                  <TemplateGallery
-                    onSelectTemplate={(templateElements) => {
-                      const elementsWithNewIds = templateElements.map(
-                        (element) => ({
-                          ...element,
-                          id: `${element.type}_${Date.now()}_${Math.random()
-                            .toString(36)
-                            .substr(2, 9)}`,
-                        })
-                      );
-                      handleElementsUpdate(elementsWithNewIds);
-                    }}
-                  />
-                  <LayersButton
-                    onClick={() => setShowLayers(!showLayers)}
-                    isActive={showLayers}
-                  />
-                </div>
-                <ExportPanel elements={elements} />
-              </div>
-              <div className="flex-1 relative">
-                <EditorCanvas
-                  initialElements={elements}
-                  onElementsUpdate={handleElementsUpdate}
-                  onSelectElement={setSelectedElement}
-                />
-                <LayersPanel
-                  elements={elements}
-                  onUpdate={handleElementsUpdate}
-                  onSelectElement={setSelectedElement}
-                  isVisible={showLayers && !selectedElement}
-                />
-              </div>
-            </main>
-          </div>
-        </DragDropContext>
-      </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <MainLayout
+          sidebar={<Sidebar />}
+          navbar={
+            <Navbar
+              elements={elements}
+              onElementsUpdate={updateElement}
+              showLayers={showLayers}
+              setShowLayers={setShowLayers}
+            />
+          }
+          content={
+            <EditorCanvas
+              elements={elements}
+              onElementsUpdate={updateElement}
+              onSelectElement={setSelectedElement}
+            />
+          }
+          styleEditor={
+            selectedElement && (
+              <StyleEditor
+                element={selectedElement}
+                onUpdate={(updates) =>
+                  handleElementUpdate(selectedElement.id, updates)
+                }
+                onClose={() => setSelectedElement(null)}
+              />
+            )
+          }
+        />
+      </DragDropContext>
     </BrowserRouter>
   );
 }

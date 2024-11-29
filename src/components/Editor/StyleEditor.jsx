@@ -1,349 +1,340 @@
 import { useState, useEffect } from "react";
-import { SketchPicker } from "react-color";
-import Slider from "rc-slider";
 import {
   FaTimes,
+  FaPalette,
   FaFont,
   FaRuler,
-  FaPalette,
-  FaEdit,
-  FaCog,
+  FaAlignLeft,
+  FaAlignCenter,
+  FaAlignRight,
+  FaAlignJustify,
+  FaImage,
+  FaYoutube,
+  FaLink,
 } from "react-icons/fa";
-import "rc-slider/assets/index.css";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import ImageUploader from "./ImageUploader";
 
 function StyleEditor({ element, onUpdate, onClose }) {
-  const [styles, setStyles] = useState(element?.styles || {});
-  const [content, setContent] = useState(element?.content || "");
+  const [localContent, setLocalContent] = useState(element.content || "");
+  const [localStyles, setLocalStyles] = useState(element.styles || {});
 
-  useEffect(() => {
-    if (element) {
-      setStyles(element.styles || {});
-      setContent(element.content || "");
-    }
-  }, [element]);
-
-  const handleStyleChange = (property, value) => {
-    const updatedStyles = { ...styles, [property]: value };
-    setStyles(updatedStyles);
+  const handleContentChange = (e) => {
+    const newContent = e.target.value;
+    setLocalContent(newContent);
     onUpdate({
       ...element,
+      content: newContent,
+      styles: localStyles,
+    });
+  };
+
+  const handleStyleChange = (property, value) => {
+    const updatedStyles = {
+      ...localStyles,
+      [property]: value,
+    };
+    setLocalStyles(updatedStyles);
+    onUpdate({
+      ...element,
+      content: localContent,
       styles: updatedStyles,
     });
   };
 
-  const handleContentChange = (newContent) => {
-    setContent(newContent);
-    onUpdate({
-      ...element,
-      content: newContent,
-    });
-  };
+  useEffect(() => {
+    setLocalContent(element.content || "");
+    setLocalStyles(element.styles || {});
+  }, [element.id]);
 
-  useGSAP(() => {
-    gsap.from(".style-editor", {
-      x: 100,
-      opacity: 0,
-      duration: 0.5,
-      ease: "power3.out",
-    });
-  }, []);
-
-  const renderInputControls = () => {
-    if (["input", "checkbox", "radio"].includes(element.type)) {
-      return (
-        <div className="border-b pb-4">
-          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-            <FaCog /> Input Settings
-          </h3>
+  const renderElementSpecificControls = () => {
+    switch (element.type) {
+      case "checkbox":
+      case "radio":
+        return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Label Text
-              </label>
+              <label className="block text-sm text-gray-600 mb-2">Label</label>
               <input
                 type="text"
-                value={element.label || ""}
-                onChange={(e) =>
-                  onUpdate({ ...element, label: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder="Enter label text"
+                value={localContent}
+                onChange={handleContentChange}
+                className="w-full px-3 py-2 border rounded"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {element.type === "input" ? "Placeholder" : "Label Content"}
-              </label>
+            <div className="flex items-center gap-2">
               <input
-                type="text"
-                value={element.content || ""}
+                type="checkbox"
+                checked={element.checked || false}
                 onChange={(e) =>
-                  onUpdate({ ...element, content: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder={
-                  element.type === "input" ? "Enter placeholder" : "Enter label"
+                  onUpdate({ ...element, checked: e.target.checked })
                 }
               />
+              <label className="text-sm text-gray-600">Default Checked</label>
             </div>
+          </div>
+        );
+
+      case "select":
+        return (
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Input Style
+              <label className="block text-sm text-gray-600 mb-2">
+                Options
               </label>
-              <select
-                value={element.inputStyle || "default"}
-                onChange={(e) =>
-                  onUpdate({ ...element, inputStyle: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-md"
+              {element.options?.map((option, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={option.label}
+                    onChange={(e) => {
+                      const newOptions = [...(element.options || [])];
+                      newOptions[index] = { ...option, label: e.target.value };
+                      onUpdate({ ...element, options: newOptions });
+                    }}
+                    className="flex-1 px-3 py-2 border rounded"
+                    placeholder="Option label"
+                  />
+                  <button
+                    onClick={() => {
+                      const newOptions = element.options?.filter(
+                        (_, i) => i !== index
+                      );
+                      onUpdate({ ...element, options: newOptions });
+                    }}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  const newOptions = [
+                    ...(element.options || []),
+                    { label: "", value: "" },
+                  ];
+                  onUpdate({ ...element, options: newOptions });
+                }}
+                className="w-full px-3 py-2 border rounded bg-gray-50 hover:bg-gray-100"
               >
-                <option value="default">Default</option>
-                <option value="outlined">Outlined</option>
-                <option value="filled">Filled</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderContentControls = () => {
-    switch (element.type) {
-      case "heading":
-        return (
-          <div className="border-b pb-4">
-            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-              <FaEdit /> Heading Content
-            </h3>
-            <div>
-              <textarea
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md resize-y"
-                placeholder="Enter heading text"
-                rows={2}
-              />
-            </div>
-          </div>
-        );
-
-      case "paragraph":
-        return (
-          <div className="border-b pb-4">
-            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-              <FaEdit /> Paragraph Content
-            </h3>
-            <div>
-              <textarea
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md resize-y"
-                placeholder="Enter paragraph text"
-                rows={4}
-              />
-            </div>
-          </div>
-        );
-
-      case "button":
-        return (
-          <div className="border-b pb-4">
-            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-              <FaEdit /> Button Text
-            </h3>
-            <div>
-              <input
-                type="text"
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder="Enter button text"
-              />
+                Add Option
+              </button>
             </div>
           </div>
         );
 
       case "image":
         return (
-          <div className="border-b pb-4">
-            <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-              <FaEdit /> Image Settings
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Image URL
-                </label>
-                <input
-                  type="text"
-                  value={content}
-                  onChange={(e) => handleContentChange(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="Enter image URL"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Alt Text
-                </label>
-                <input
-                  type="text"
-                  value={element.alt || ""}
-                  onChange={(e) =>
-                    onUpdate({ ...element, alt: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="Enter alt text"
-                />
-              </div>
+          <div className="space-y-4">
+            <ImageUploader
+              currentSrc={element.src}
+              onImageSelect={(src) => onUpdate({ ...element, src })}
+            />
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">
+                Alt Text
+              </label>
+              <input
+                type="text"
+                value={element.alt || ""}
+                onChange={(e) => onUpdate({ ...element, alt: e.target.value })}
+                className="w-full px-3 py-2 border rounded"
+                placeholder="Enter alt text"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">
+                Object Fit
+              </label>
+              <select
+                value={localStyles.objectFit || "cover"}
+                onChange={(e) => handleStyleChange("objectFit", e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+              >
+                <option value="cover">Cover</option>
+                <option value="contain">Contain</option>
+                <option value="fill">Fill</option>
+                <option value="none">None</option>
+              </select>
             </div>
           </div>
         );
 
-      default:
-        return null;
+      case "youtube":
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">
+                YouTube URL
+              </label>
+              <input
+                type="text"
+                value={element.videoUrl || ""}
+                onChange={(e) => {
+                  const videoId = extractYouTubeId(e.target.value);
+                  onUpdate({ ...element, videoId, videoUrl: e.target.value });
+                }}
+                className="w-full px-3 py-2 border rounded"
+                placeholder="Enter YouTube URL"
+              />
+            </div>
+          </div>
+        );
+
+      case "link":
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">
+                Link URL
+              </label>
+              <input
+                type="text"
+                value={element.href || ""}
+                onChange={(e) => onUpdate({ ...element, href: e.target.value })}
+                className="w-full px-3 py-2 border rounded"
+                placeholder="Enter link URL"
+              />
+            </div>
+          </div>
+        );
     }
   };
 
   return (
-    <div className="style-editor fixed right-0 top-0 w-full md:w-80 lg:w-64 h-full bg-white shadow-lg p-4 overflow-y-auto z-50">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Style Editor - {element.type}</h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+    <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl p-6 overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold">Style Editor</h3>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-gray-100 rounded-full"
+        >
           <FaTimes />
         </button>
       </div>
 
       <div className="space-y-6">
-        {renderContentControls()}
-        {renderInputControls()}
+        {/* Content Section */}
+        <section className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-4">Content</h4>
+          <textarea
+            value={localContent}
+            onChange={handleContentChange}
+            className="w-full px-3 py-2 border rounded min-h-[60px]"
+            placeholder="Enter text"
+          />
+        </section>
 
-        <div className="border-b pb-4">
-          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-            <FaPalette /> Colors
-          </h3>
+        {/* Typography Section */}
+        <section className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-4">Typography</h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Text Color
-              </label>
-              <SketchPicker
-                color={styles.color}
-                onChange={(color) => handleStyleChange("color", color.hex)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Background
-              </label>
-              <SketchPicker
-                color={styles.backgroundColor}
-                onChange={(color) =>
-                  handleStyleChange("backgroundColor", color.hex)
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="border-b pb-4">
-          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-            <FaFont /> Font
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm text-gray-600 mb-2">
                 Font Size
               </label>
-              <Slider
-                min={8}
-                max={72}
-                value={styles.fontSize}
-                onChange={(value) => handleStyleChange("fontSize", value)}
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="8"
+                  max="72"
+                  value={parseInt(localStyles?.fontSize) || 16}
+                  onChange={(e) =>
+                    handleStyleChange("fontSize", `${e.target.value}px`)
+                  }
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  value={parseInt(localStyles?.fontSize) || 16}
+                  onChange={(e) =>
+                    handleStyleChange("fontSize", `${e.target.value}px`)
+                  }
+                  className="w-20 px-2 py-1 border rounded text-center"
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-sm font-medium mb-2">Padding</label>
-              <Slider
-                min={0}
-                max={100}
-                value={styles.padding}
-                onChange={(value) => handleStyleChange("padding", value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Margin</label>
-              <Slider
-                min={0}
-                max={100}
-                value={styles.margin}
-                onChange={(value) => handleStyleChange("margin", value)}
-              />
+              <label className="block text-sm text-gray-600 mb-2">
+                Text Alignment
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { icon: <FaAlignLeft />, value: "left" },
+                  { icon: <FaAlignCenter />, value: "center" },
+                  { icon: <FaAlignRight />, value: "right" },
+                  { icon: <FaAlignJustify />, value: "justify" },
+                ].map(({ icon, value }) => (
+                  <button
+                    key={value}
+                    onClick={() => handleStyleChange("textAlign", value)}
+                    className={`flex-1 p-2 rounded ${
+                      localStyles?.textAlign === value
+                        ? "bg-blue-100"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="border-b pb-4">
-          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-            <FaRuler /> Border
-          </h3>
+        {/* Colors Section */}
+        <section className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-4">Colors</h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Border Radius
+              <label className="block text-sm text-gray-600 mb-2">
+                Text Color
               </label>
-              <Slider
-                min={0}
-                max={50}
-                value={styles.borderRadius}
-                onChange={(value) => handleStyleChange("borderRadius", value)}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={localStyles.color || "#000000"}
+                  onChange={(e) => handleStyleChange("color", e.target.value)}
+                  className="w-10 h-10 p-1 border rounded"
+                />
+                <input
+                  type="text"
+                  value={localStyles.color || "#000000"}
+                  onChange={(e) => handleStyleChange("color", e.target.value)}
+                  className="flex-1 px-3 py-2 border rounded"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Border Width
-              </label>
-              <Slider
-                min={0}
-                max={10}
-                value={styles.borderWidth}
-                onChange={(value) => handleStyleChange("borderWidth", value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Border Color
-              </label>
-              <SketchPicker
-                color={styles.borderColor}
-                onChange={(color) =>
-                  handleStyleChange("borderColor", color.hex)
-                }
-              />
-            </div>
-          </div>
-        </div>
 
-        <div className="border-b pb-4">
-          <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-            <FaPalette /> Background
-          </h3>
-          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Opacity</label>
-              <Slider
-                min={0}
-                max={100}
-                value={styles.opacity}
-                onChange={(value) => handleStyleChange("opacity", value)}
-              />
+              <label className="block text-sm text-gray-600 mb-2">
+                Background Color
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={localStyles.backgroundColor || "#ffffff"}
+                  onChange={(e) =>
+                    handleStyleChange("backgroundColor", e.target.value)
+                  }
+                  className="w-10 h-10 p-1 border rounded"
+                />
+                <input
+                  type="text"
+                  value={localStyles.backgroundColor || "#ffffff"}
+                  onChange={(e) =>
+                    handleStyleChange("backgroundColor", e.target.value)
+                  }
+                  className="flex-1 px-3 py-2 border rounded"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Element Specific Controls */}
+        {renderElementSpecificControls()}
       </div>
     </div>
   );
