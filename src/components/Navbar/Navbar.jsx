@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  FaSave,
-  FaFolderOpen,
-  FaDownload,
-  FaLayerGroup,
-  FaImage,
-} from "react-icons/fa";
+import { FaSave, FaFolderOpen, FaDownload, FaLayerGroup } from "react-icons/fa";
 import ProjectManager from "../ProjectManager/ProjectManager";
 import TemplateGallery from "../Templates/TemplateGallery";
 import ExportPanel from "../Editor/ExportPanel";
@@ -13,9 +7,10 @@ import ExportPanel from "../Editor/ExportPanel";
 function Navbar({ elements, onElementsUpdate, showLayers, setShowLayers }) {
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const handleTemplateSelect = (templateElements) => {
-    console.log("Selected template elements:", templateElements); // Debug log
-    onElementsUpdate(templateElements);
+  const handleTemplateSelect = (template) => {
+    if (template && template.elements) {
+      onElementsUpdate(template.elements);
+    }
   };
 
   return (

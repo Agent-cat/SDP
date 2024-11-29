@@ -100,18 +100,16 @@ function App() {
               onSelectElement={setSelectedElement}
             />
           }
-          styleEditor={
-            selectedElement && (
-              <StyleEditor
-                element={selectedElement}
-                onUpdate={(updates) =>
-                  handleElementUpdate(selectedElement.id, updates)
-                }
-                onClose={() => setSelectedElement(null)}
-              />
-            )
-          }
         />
+        {selectedElement && (
+          <StyleEditor
+            element={selectedElement}
+            onUpdate={(updates) =>
+              handleElementUpdate(selectedElement.id, updates)
+            }
+            onClose={() => setSelectedElement(null)}
+          />
+        )}
       </DragDropContext>
     </BrowserRouter>
   );
