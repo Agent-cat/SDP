@@ -13,6 +13,7 @@ import {
   FaLink,
   FaBorderStyle,
   FaExpandAlt,
+  FaUpload,
 } from "react-icons/fa";
 import ImageUploader from "./ImageUploader";
 
@@ -78,6 +79,110 @@ function StyleEditor({ element, onUpdate, onClose }) {
     setLocalPlaceholder(element.placeholder || "");
     setLocalLabel(element.label || "");
   }, [element.id]);
+
+  const imageSpecificSections = [
+    {
+      id: "image",
+      label: "Image Settings",
+      icon: <FaImage />,
+      show: element.type === "image",
+      content: (
+        <div className="space-y-4">
+          {/* Image Preview */}
+          <div className="relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden">
+            {element.src ? (
+              <img
+                src={element.src}
+                alt="Preview"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                <FaImage size={24} className="mr-2" />
+                <span>No image selected</span>
+              </div>
+            )}
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-2">
+              Upload Image
+            </label>
+            <div className="flex gap-2">
+              <label className="flex-1 cursor-pointer">
+                <div className="w-full px-4 py-2 text-center border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+                  <FaUpload className="inline-block mr-2" />
+                  Choose Image
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Image URL */}
+          <div>
+            <label className="block text-sm text-gray-600">Image URL</label>
+            <input
+              type="text"
+              value={element.src || ""}
+              onChange={(e) => handleStyleChange("src", e.target.value)}
+              className="w-full px-3 py-2 rounded border border-gray-200"
+              placeholder="Enter image URL"
+            />
+          </div>
+
+          {/* Object Fit */}
+          <div>
+            <label className="block text-sm text-gray-600">Object Fit</label>
+            <select
+              value={element.styles?.objectFit || "cover"}
+              onChange={(e) => handleStyleChange("objectFit", e.target.value)}
+              className="w-full px-3 py-2 rounded border border-gray-200"
+            >
+              <option value="cover">Cover</option>
+              <option value="contain">Contain</option>
+              <option value="fill">Fill</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+
+          {/* Border Radius */}
+          <div>
+            <label className="block text-sm text-gray-600">Border Radius</label>
+            <input
+              type="number"
+              value={parseInt(element.styles?.borderRadius) || 0}
+              onChange={(e) =>
+                handleStyleChange("borderRadius", `${e.target.value}px`)
+              }
+              className="w-full px-3 py-2 rounded border border-gray-200"
+            />
+          </div>
+
+          {/* Shadow */}
+          <div>
+            <label className="block text-sm text-gray-600">Shadow</label>
+            <select
+              value={element.styles?.boxShadow || "none"}
+              onChange={(e) => handleStyleChange("boxShadow", e.target.value)}
+              className="w-full px-3 py-2 rounded border border-gray-200"
+            >
+              <option value="none">None</option>
+              <option value="0 2px 4px rgba(0,0,0,0.1)">Small</option>
+              <option value="0 4px 6px rgba(0,0,0,0.1)">Medium</option>
+              <option value="0 10px 15px rgba(0,0,0,0.1)">Large</option>
+            </select>
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   const renderElementSpecificControls = () => {
     switch (element.type) {

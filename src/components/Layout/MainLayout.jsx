@@ -1,9 +1,24 @@
-import { FaBars, FaTimes, FaMoon, FaSun } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { FaBars, FaTimes, FaSun, FaMoon } from "react-icons/fa";
 
 function MainLayout({ sidebar, navbar, content, styleEditor }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div
@@ -33,14 +48,14 @@ function MainLayout({ sidebar, navbar, content, styleEditor }) {
             <span
               className={`font-bold text-xl ${
                 isDarkMode ? "text-white" : "text-gray-800"
-              }`}
+              } hidden sm:inline`}
             >
               Form Builder
             </span>
           </div>
 
           {/* Navbar Content */}
-          <div className="flex-1 ml-8">{navbar}</div>
+          <div className="flex-1 ml-4 overflow-x-auto">{navbar}</div>
 
           {/* Theme Toggle */}
           <button
@@ -56,49 +71,52 @@ function MainLayout({ sidebar, navbar, content, styleEditor }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar */}
+        {/* Sidebar with transition */}
         <div
-          className={`${
-            isSidebarOpen ? "w-64" : "w-0"
-          } transition-all duration-300 flex flex-col border-r ${
-            isDarkMode
-              ? "bg-gray-800 border-gray-700"
-              : "bg-white border-gray-200"
-          }`}
+          className={`${isSidebarOpen ? "w-64" : "w-0"} ${
+            isMobile ? "absolute z-50 h-full" : "relative"
+          } transition-all duration-300 ease-in-out flex-shrink-0`}
         >
-          {sidebar}
-        </div>
-
-        {/* Center Canvas */}
-        <div
-          className={`flex-1 overflow-auto ${
-            isDarkMode ? "bg-gray-900" : "bg-gray-100"
-          }`}
-        >
-          <div className="h-full p-6">
-            <div
-              className={`h-full rounded-lg ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
-            >
-              {content}
-            </div>
+          <div
+            className={`${
+              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } absolute w-64 h-full bg-white border-r transition-transform duration-300 ease-in-out`}
+          >
+            {sidebar}
           </div>
         </div>
 
-        {/* Right Style Editor Panel */}
+        {/* Main Content with transition */}
+        <div
+          className={`flex-1 flex flex-col overflow-hidden relative transition-all duration-300 ease-in-out`}
+          style={{
+            marginLeft: isMobile ? 0 : undefined,
+          }}
+        >
+          {content}
+        </div>
+
+        {/* Style Editor - Mobile Bottom Sheet / Desktop Sidebar */}
         {styleEditor && (
           <div
-            className={`w-80 border-l ${
-              isDarkMode
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
+            className={`${
+              isMobile
+                ? "fixed bottom-0 left-0 right-0 max-h-[70vh] rounded-t-xl shadow-lg"
+                : "w-80 border-l"
+            } bg-white overflow-y-auto z-40`}
           >
             {styleEditor}
           </div>
         )}
       </div>
+
+      {/* Mobile Overlay when sidebar is open */}
+      {isMobile && isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
