@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { FaDownload, FaLayerGroup, FaTrash } from "react-icons/fa";
+import {
+  FaDownload,
+  FaLayerGroup,
+  FaTrash,
+  FaMobile,
+  FaTabletAlt,
+  FaDesktop,
+} from "react-icons/fa";
 import TemplateGallery from "../Templates/TemplateGallery";
 import ExportPanel from "../Editor/ExportPanel";
 
@@ -10,6 +17,7 @@ function Navbar({
   setShowLayers,
   selectedElement,
   onDeleteElement,
+  onDeviceChange,
 }) {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -39,6 +47,31 @@ function Navbar({
           onSelectTemplate={handleTemplateSelect}
           elements={elements}
         />
+
+        {/* Device Preview Controls */}
+        <div className="flex gap-2 bg-white rounded-lg p-1">
+          <button
+            onClick={() => onDeviceChange("375px")}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Mobile View"
+          >
+            <FaMobile />
+          </button>
+          <button
+            onClick={() => onDeviceChange("768px")}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Tablet View"
+          >
+            <FaTabletAlt />
+          </button>
+          <button
+            onClick={() => onDeviceChange("100%")}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Desktop View"
+          >
+            <FaDesktop />
+          </button>
+        </div>
 
         <button
           onClick={() => setShowLayers(!showLayers)}

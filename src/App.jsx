@@ -21,6 +21,7 @@ function App() {
   } = useElements([]);
 
   const [showLayers, setShowLayers] = useState(false);
+  const [deviceWidth, setDeviceWidth] = useState("100%");
 
   const handleDragEnd = useCallback(
     (result) => {
@@ -93,6 +94,7 @@ function App() {
               setShowLayers={setShowLayers}
               selectedElement={selectedElement}
               onDeleteElement={removeElement}
+              onDeviceChange={setDeviceWidth}
             />
           }
           content={
@@ -100,6 +102,7 @@ function App() {
               elements={elements}
               onElementsUpdate={updateElement}
               onSelectElement={setSelectedElement}
+              deviceWidth={deviceWidth}
             />
           }
         />
