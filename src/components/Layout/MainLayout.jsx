@@ -20,11 +20,7 @@ function MainLayout({ sidebar, navbar, content, styleEditor }) {
   }, []);
 
   return (
-    <div
-      className={`h-screen flex flex-col ${
-        isDarkMode ? "bg-gray-900" : "bg-white"
-      }`}
-    >
+    <div className={`h-screen flex flex-col bg-white`}>
       {/* Top Navigation Bar */}
       <div
         className={`h-14 border-b ${
@@ -49,7 +45,7 @@ function MainLayout({ sidebar, navbar, content, styleEditor }) {
                 isDarkMode ? "text-white" : "text-gray-800"
               } hidden sm:inline`}
             >
-              Form Builder
+              WEB BUILD
             </span>
           </div>
 

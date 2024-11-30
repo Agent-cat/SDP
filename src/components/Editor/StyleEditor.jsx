@@ -14,6 +14,7 @@ import {
   FaBorderStyle,
   FaExpandAlt,
   FaUpload,
+  FaCheck,
 } from "react-icons/fa";
 import ImageUploader from "./ImageUploader";
 
@@ -725,10 +726,7 @@ function StyleEditor({ element, onUpdate, onClose }) {
     <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl p-6 overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Style Editor</h3>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-full"
-        >
+        <button onClick={onClose} className="p-2 hover:bg-blue-50 rounded-full">
           <FaTimes />
         </button>
       </div>

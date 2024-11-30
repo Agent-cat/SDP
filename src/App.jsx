@@ -91,6 +91,8 @@ function App() {
               onElementsUpdate={updateElement}
               showLayers={showLayers}
               setShowLayers={setShowLayers}
+              selectedElement={selectedElement}
+              onDeleteElement={removeElement}
             />
           }
           content={

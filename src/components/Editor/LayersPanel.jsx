@@ -25,7 +25,7 @@ function LayersPanel({ elements, onUpdate, onSelectElement, isVisible }) {
   };
 
   return (
-    <div className="fixed right-0 top-0 w-full md:w-80 lg:w-64 h-full bg-gray-50 shadow-xl p-4 overflow-y-auto z-40">
+    <div className="fixed right-0 top-0 w-full md:w-80 lg:w-64 h-full bg-white shadow-xl p-4 overflow-y-auto z-40">
       <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-200">
         <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
           <FaLayerGroup className="text-blue-500" />

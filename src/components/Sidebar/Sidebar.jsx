@@ -128,52 +128,57 @@ function Sidebar() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">
-            {filteredCategories.map((category) => (
-              <div key={category.title} className="mb-4">
-                <button
-                  onClick={() => toggleCategory(category.title)}
-                  className="flex items-center justify-between w-full p-2 text-left"
-                >
-                  <span className="font-medium text-gray-700">
-                    {category.title}
-                  </span>
-                  <FaChevronDown
-                    className={`transform transition-transform ${
-                      expandedCategories[category.title] ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
+            {filteredCategories.map((category, index) => (
+              <div key={category.title}>
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleCategory(category.title)}
+                    className="flex items-center justify-between w-full p-2 text-left"
+                  >
+                    <span className="font-medium text-gray-700">
+                      {category.title}
+                    </span>
+                    <FaChevronDown
+                      className={`transform transition-transform ${
+                        expandedCategories[category.title] ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
 
-                {expandedCategories[category.title] && (
-                  <div className="mt-2 space-y-2">
-                    {category.items.map((item, index) => (
-                      <Draggable
-                        key={item.id}
-                        draggableId={item.id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`flex items-center p-3 rounded-lg border ${
-                              snapshot.isDragging
-                                ? "shadow-lg bg-blue-50 border-blue-200"
-                                : "bg-white border-gray-200 hover:border-blue-300"
-                            }`}
-                          >
-                            <span className="mr-3 text-gray-600">
-                              {item.icon}
-                            </span>
-                            <span className="text-sm font-medium">
-                              {item.label}
-                            </span>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                  </div>
+                  {expandedCategories[category.title] && (
+                    <div className="mt-2 space-y-2">
+                      {category.items.map((item, index) => (
+                        <Draggable
+                          key={item.id}
+                          draggableId={item.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`flex items-center p-3 rounded-lg border ${
+                                snapshot.isDragging
+                                  ? "shadow-lg bg-blue-50 border-blue-200"
+                                  : "bg-white border-gray-200 hover:border-blue-300"
+                              }`}
+                            >
+                              <span className="mr-3 text-gray-600">
+                                {item.icon}
+                              </span>
+                              <span className="text-sm font-medium">
+                                {item.label}
+                              </span>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {index < filteredCategories.length - 1 && (
+                  <hr className="border-t border-gray-200 mb-4" />
                 )}
               </div>
             ))}

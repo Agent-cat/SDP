@@ -37,14 +37,40 @@ const EditorCanvas = memo(({ elements, onElementsUpdate, onSelectElement }) => {
   );
 
   return (
-    <Droppable droppableId="canvas">
+    <Droppable
+      droppableId="canvas"
+      ignoreContainerClipping={true}
+      renderClone={(provided, snapshot, rubric) => (
+        <div
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          ref={provided.innerRef}
+        >
+          {elements[rubric.source.index] && (
+            <ElementRenderer
+              element={elements[rubric.source.index]}
+              onUpdate={handleElementUpdate}
+            />
+          )}
+        </div>
+      )}
+    >
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
           className={`relative w-full h-full min-h-screen p-8 transition-colors ${
             snapshot.isDraggingOver ? "bg-blue-50" : "bg-gray-50"
-          }`}
+          } border-l border-gray-200`}
+          style={{
+            position: "relative",
+            minHeight: "100vh",
+            width: "100%",
+            backgroundImage:
+              "linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)",
+            backgroundSize: "20px 20px",
+            backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+          }}
         >
           {elements.map((element) => (
             <Rnd
@@ -80,7 +106,7 @@ const EditorCanvas = memo(({ elements, onElementsUpdate, onSelectElement }) => {
 
           {/* Drop indicator */}
           {snapshot.isDraggingOver && (
-            <div className="absolute inset-0 border-2 border-blue-400 border-dashed pointer-events-none" />
+            <div className="absolute inset-0 border-2 border-blue-400 border-dashed pointer-events-none bg-blue-50 bg-opacity-50" />
           )}
         </div>
       )}
