@@ -1,12 +1,10 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import { Droppable } from "@hello-pangea/dnd";
 import { Rnd } from "react-rnd";
 import ElementRenderer from "./ElementRenderer";
 
 const EditorCanvas = memo(
   ({ elements, onElementsUpdate, onSelectElement, deviceWidth }) => {
-    const [isDraggingOver, setIsDraggingOver] = useState(false);
-
     const handleDragStop = useCallback(
       (id, position) => {
         const updatedElements = elements.map((el) =>
@@ -27,16 +25,6 @@ const EditorCanvas = memo(
       [elements, onElementsUpdate]
     );
 
-    const handleElementUpdate = useCallback(
-      (updatedElement) => {
-        const updatedElements = elements.map((el) =>
-          el.id === updatedElement.id ? { ...el, ...updatedElement } : el
-        );
-        onElementsUpdate(updatedElements);
-      },
-      [elements, onElementsUpdate]
-    );
-
     return (
       <Droppable droppableId="canvas" direction="vertical">
         {(provided, snapshot) => (
@@ -45,7 +33,6 @@ const EditorCanvas = memo(
             {...provided.droppableProps}
             className="relative flex-1 overflow-auto"
           >
-            {/* Canvas Container with dynamic width */}
             <div
               style={{
                 width: deviceWidth,
@@ -83,15 +70,10 @@ const EditorCanvas = memo(
                     element.hidden ? "opacity-50" : ""
                   }`}
                 >
-                  <ElementRenderer
-                    element={element}
-                    onUpdate={handleElementUpdate}
-                  />
+                  <ElementRenderer element={element} />
                 </Rnd>
               ))}
               {provided.placeholder}
-
-              {/* Drop indicator */}
               {snapshot.isDraggingOver && (
                 <div className="absolute inset-0 border-2 border-blue-400 border-dashed pointer-events-none bg-blue-50 bg-opacity-50" />
               )}

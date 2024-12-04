@@ -5,12 +5,10 @@ export function useElements(initialElements = []) {
   const [selectedElement, setSelectedElement] = useState(null);
 
   const updateElement = useCallback((elementId, updates) => {
-    console.log("Updating element:", elementId, updates); // Debug log
     setElements((prevElements) => {
       const newElements = prevElements.map((el) =>
         el.id === elementId ? { ...el, ...updates } : el
       );
-      console.log("New elements:", newElements); // Debug log
       return newElements;
     });
 
