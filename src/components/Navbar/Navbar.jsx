@@ -41,14 +41,12 @@ function Navbar({
 
   return (
     <div className="flex items-center justify-between w-full">
-      {/* Center - Main Actions */}
       <div className="flex-1 flex items-center justify-center space-x-4">
         <TemplateGallery
           onSelectTemplate={handleTemplateSelect}
           elements={elements}
         />
 
-        {/* Device Preview Controls */}
         <div className="flex gap-2 bg-white rounded-lg p-1">
           <button
             onClick={() => onDeviceChange("375px")}
@@ -104,7 +102,6 @@ function Navbar({
         )}
       </div>
 
-      {/* Right - User Profile */}
       <div className="flex items-center pr-4">
         <div className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
@@ -125,7 +122,6 @@ function Navbar({
         />
       )}
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && selectedElement && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">

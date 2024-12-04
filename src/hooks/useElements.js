@@ -12,7 +12,6 @@ export function useElements(initialElements = []) {
       return newElements;
     });
 
-    // Update selected element if it's the one being modified
     setSelectedElement((prev) =>
       prev?.id === elementId ? { ...prev, ...updates } : prev
     );

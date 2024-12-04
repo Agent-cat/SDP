@@ -32,7 +32,7 @@ function App() {
         destination.droppableId === "canvas"
       ) {
         const newElement = {
-          id: `${draggableId}_${Date.now()}`,
+          id: `${draggableId}_${destination.x || 0}_${destination.y || 0}`,
           type: draggableId,
           content: "",
           x: destination.x || 0,
