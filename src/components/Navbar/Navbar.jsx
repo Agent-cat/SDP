@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaDownload,
   FaLayerGroup,
@@ -6,9 +7,14 @@ import {
   FaMobile,
   FaTabletAlt,
   FaDesktop,
+  FaUser,
+  FaCog,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import TemplateGallery from "../Templates/TemplateGallery";
 import ExportPanel from "../Editor/ExportPanel";
+import { getToken } from "../../utils/auth";
+import axios from "axios";
 
 function Navbar({
   elements,
@@ -19,8 +25,61 @@ function Navbar({
   onDeleteElement,
   onDeviceChange,
 }) {
+  const navigate = useNavigate();
   const [showExportModal, setShowExportModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    // Load user data from localStorage
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
+    // Fetch fresh user data
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/v1/auth/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const userData = {
+          username: response.data.username,
+          profilePicture: response.data.profilePicture,
+          email: response.data.email,
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
 
   const handleTemplateSelect = (template) => {
     if (template && template.elements) {
@@ -39,9 +98,21 @@ function Navbar({
     }
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProfileDropdown && !event.target.closest(".profile-dropdown")) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showProfileDropdown]);
+
   return (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex-1 flex items-center justify-center space-x-4">
+    <div className="flex items-center justify-between w-full h-14">
+      <div className="flex-1 flex items-center justify-center space-x-4 overflow-x-auto scrollbar-hide">
         <TemplateGallery
           onSelectTemplate={handleTemplateSelect}
           elements={elements}
@@ -103,16 +174,75 @@ function Navbar({
       </div>
 
       <div className="flex items-center pr-4">
-        <div className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100">
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
-            <img
-              src="https://via.placeholder.com/32"
-              alt="User"
-              className="w-full h-full object-cover"
-            />
+        {user && (
+          <div className="relative profile-dropdown">
+            <button
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+            >
+              <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-200 ring-2 ring-blue-500 ring-offset-2">
+                <img
+                  src={user.profilePicture || "https://via.placeholder.com/36"}
+                  alt={user.username}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-semibold text-gray-700">
+                  {user.username}
+                </span>
+                <span className="text-xs text-gray-500">{user.email}</span>
+              </div>
+            </button>
+
+            {/* Enhanced Dropdown Menu - Fixed position */}
+            {showProfileDropdown && (
+              <div className="fixed right-4 top-16 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-[100]">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <p className="text-sm font-semibold text-gray-700">
+                    {user.username}
+                  </p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigate("/profile");
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <FaUser className="text-gray-400" />
+                  <span>View Profile</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigate("/settings");
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <FaCog className="text-gray-400" />
+                  <span>Settings</span>
+                </button>
+
+                <div className="border-t border-gray-100 my-1"></div>
+
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <FaSignOutAlt className="text-red-500" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
           </div>
-          <span className="text-gray-700 font-medium">John Doe</span>
-        </div>
+        )}
       </div>
 
       {showExportModal && (
