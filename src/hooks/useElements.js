@@ -1,29 +1,45 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
-export function useElements(initialElements = []) {
+export const useElements = (initialElements = []) => {
   const [elements, setElements] = useState(initialElements);
   const [selectedElement, setSelectedElement] = useState(null);
 
-  const updateElement = useCallback((elementId, updates) => {
-    setElements((prevElements) => {
-      const newElements = prevElements.map((el) =>
-        el.id === elementId ? { ...el, ...updates } : el
+  const updateElement = (elementOrElements, updates) => {
+    if (Array.isArray(elementOrElements)) {
+      // Handle array of elements (full update)
+      setElements(elementOrElements);
+    } else if (typeof elementOrElements === "string" && updates) {
+      // Handle single element update by ID - only update the specific element
+      setElements((prevElements) =>
+        prevElements.map((el) =>
+          el.id === elementOrElements ? { ...el, ...updates } : el
+        )
       );
-      return newElements;
-    });
+      // Update selected element if it's being modified
+      if (selectedElement?.id === elementOrElements) {
+        setSelectedElement((prev) => ({ ...prev, ...updates }));
+      }
+    }
+  };
 
-    setSelectedElement((prev) =>
-      prev?.id === elementId ? { ...prev, ...updates } : prev
-    );
-  }, []);
+  const addElement = (newElement) => {
+    // Generate a unique ID for each new element
+    const uniqueId = `${newElement.type}_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    const elementWithUniqueId = {
+      ...newElement,
+      id: uniqueId,
+    };
+    setElements((prev) => [...prev, elementWithUniqueId]);
+  };
 
-  const addElement = useCallback((element) => {
-    setElements((prev) => [...prev, element]);
-  }, []);
-
-  const removeElement = useCallback((elementId) => {
+  const removeElement = (elementId) => {
     setElements((prev) => prev.filter((el) => el.id !== elementId));
-  }, []);
+    if (selectedElement?.id === elementId) {
+      setSelectedElement(null);
+    }
+  };
 
   return {
     elements,
@@ -33,4 +49,4 @@ export function useElements(initialElements = []) {
     addElement,
     removeElement,
   };
-}
+};

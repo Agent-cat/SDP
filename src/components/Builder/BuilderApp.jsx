@@ -1,6 +1,6 @@
 import { BrowserRouter } from "react-router-dom";
 import { useElements } from "../../hooks/useElements";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import EditorCanvas from "../Editor/EditorCanvas";
 import Sidebar from "../Sidebar/Sidebar";
 import MainLayout from "../Layout/MainLayout";
@@ -21,6 +21,51 @@ function BuilderApp() {
   const [showLayers, setShowLayers] = useState(false);
   const [deviceWidth, setDeviceWidth] = useState("100%");
 
+  // Load current project when component mounts
+  useEffect(() => {
+    const currentProject = localStorage.getItem("currentProject");
+    if (currentProject) {
+      try {
+        const project = JSON.parse(currentProject);
+        if (Array.isArray(project.elements)) {
+          updateElement(project.elements);
+        }
+      } catch (error) {
+        console.error("Error loading project:", error);
+      }
+    }
+  }, []);
+
+  const handleElementsUpdate = (newElements) => {
+    if (Array.isArray(newElements)) {
+      updateElement(newElements);
+      saveToCurrentProject(newElements);
+    }
+  };
+
+  const handleStyleUpdate = (elementId, updates) => {
+    updateElement(elementId, updates);
+    const updatedElements = elements.map((el) =>
+      el.id === elementId ? { ...el, ...updates } : el
+    );
+    saveToCurrentProject(updatedElements);
+  };
+
+  const saveToCurrentProject = (updatedElements) => {
+    const currentProject = localStorage.getItem("currentProject");
+    if (currentProject) {
+      try {
+        const project = JSON.parse(currentProject);
+        project.elements = updatedElements;
+        project.lastModified = new Date().toISOString();
+        localStorage.setItem(project.id, JSON.stringify(project));
+        localStorage.setItem("currentProject", JSON.stringify(project));
+      } catch (error) {
+        console.error("Error saving project:", error);
+      }
+    }
+  };
+
   const handleDragEnd = useCallback(
     (result) => {
       if (!result.destination) return;
@@ -32,7 +77,6 @@ function BuilderApp() {
         destination.droppableId === "canvas"
       ) {
         const newElement = {
-          id: `${draggableId}_${destination.x || 0}_${destination.y || 0}`,
           type: draggableId,
           content: "",
           x: destination.x || 0,
@@ -57,7 +101,7 @@ function BuilderApp() {
         navbar={
           <Navbar
             elements={elements}
-            onElementsUpdate={updateElement}
+            onElementsUpdate={handleElementsUpdate}
             showLayers={showLayers}
             setShowLayers={setShowLayers}
             selectedElement={selectedElement}
@@ -68,7 +112,7 @@ function BuilderApp() {
         content={
           <EditorCanvas
             elements={elements}
-            onElementsUpdate={updateElement}
+            onElementsUpdate={handleElementsUpdate}
             onSelectElement={setSelectedElement}
             deviceWidth={deviceWidth}
           />
@@ -77,7 +121,7 @@ function BuilderApp() {
       {selectedElement && (
         <StyleEditor
           element={selectedElement}
-          onUpdate={(updates) => updateElement(selectedElement.id, updates)}
+          onUpdate={(updates) => handleStyleUpdate(selectedElement.id, updates)}
           onClose={() => setSelectedElement(null)}
         />
       )}

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../../utils/auth";
+import { FaBolt, FaPalette, FaMobileAlt } from "react-icons/fa";
 
 function Home() {
   const navigate = useNavigate();

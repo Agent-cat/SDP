@@ -10,6 +10,8 @@ import {
   FaUser,
   FaCog,
   FaSignOutAlt,
+  FaSave,
+  FaFolderOpen,
 } from "react-icons/fa";
 import TemplateGallery from "../Templates/TemplateGallery";
 import ExportPanel from "../Editor/ExportPanel";
@@ -98,6 +100,17 @@ function Navbar({
     }
   };
 
+  const handleSave = () => {
+    const currentProject = localStorage.getItem("currentProject");
+    if (currentProject) {
+      const project = JSON.parse(currentProject);
+      project.elements = elements;
+      project.lastModified = new Date().toISOString();
+      localStorage.setItem(project.id, JSON.stringify(project));
+      alert("Project saved successfully!");
+    }
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -173,7 +186,21 @@ function Navbar({
         )}
       </div>
 
-      <div className="flex items-center pr-4">
+      <div className="flex items-center gap-4 pr-4">
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          <FaSave /> Save
+        </button>
+
+        <button
+          onClick={() => navigate("/projects")}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <FaFolderOpen /> Projects
+        </button>
+
         {user && (
           <div className="relative profile-dropdown">
             <button

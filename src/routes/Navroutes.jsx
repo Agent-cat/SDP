@@ -8,19 +8,23 @@ import Settings from "../components/Profile/Settings";
 import PrivateRoute from "./PrivateRoute";
 import PublicRoute from "./PublicRoute";
 import { getToken } from "../utils/auth";
+import ProjectSelectionScreen from "../components/ProjectManager/ProjectSelectionScreen";
 
 const Navroutes = () => {
   return (
     <Routes>
+      {/* Public Routes - Accessible to everyone */}
+      <Route path="/" element={<Home />} />
+
       {/* Public Routes - Accessible only when not logged in */}
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Home />} />
       </Route>
 
       {/* Protected Routes - Accessible only when logged in */}
       <Route element={<PrivateRoute />}>
+        <Route path="/projects" element={<ProjectSelectionScreen />} />
         <Route path="/build" element={<BuilderApp />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
@@ -31,7 +35,7 @@ const Navroutes = () => {
         path="*"
         element={
           getToken() ? (
-            <Navigate to="/build" replace />
+            <Navigate to="/projects" replace />
           ) : (
             <Navigate to="/" replace />
           )

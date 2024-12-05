@@ -15,3 +15,17 @@ export const getDecodedToken = () => {
     return null;
   }
 };
+
+export const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("canvasElements");
+  window.location.href = "/";
+};
+
+export const logoutWithNavigate = (navigate) => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("canvasElements");
+  navigate("/");
+};
